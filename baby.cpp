@@ -50,16 +50,16 @@ void Baby::readFile(){
 	while(getline(out, line))
 	{
 		for(int i = 0; i < 32; i++) {
-		memory[lineCount][i] = line.at(i);
-    	cout << line.at(i);
+		int value;
+		value = line.at(i) - 48;
+		memory[lineCount][i] = value;
   		}
 
   	lineCount++;
-  	cout << "End of line"<< endl;
 	}
 
 
-	out.close();*/
+	out.close();
 }
 void Baby::printMemory(){
 	for(int i = 0; i<32; i++)
