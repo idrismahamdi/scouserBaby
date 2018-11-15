@@ -7,11 +7,11 @@
 using namespace std;
 
 //holds the line adress in the store of where the next line will be fetched
-bool control[32]={0};
+int control[32]={0};
 //holds the instructions opcode
 int present[32]={0};
 //accumulator
-bool accumulator[32]={0};
+int accumulator[32]={0};
  
 int operand[5]={0};
 
@@ -41,7 +41,7 @@ void Baby::increment_CI()
 
 	for(int i = 0; i < 32; i++)
 	{
-		present[i] = memory[decimalOperand][i];
+		present[i] = control[i];
 	}
 }
 
@@ -67,6 +67,8 @@ void Baby::initMemory(){
 			memory[i][j] = 0;
 		}
 	}
+
+	
 }
 
 void Baby::decode()
@@ -113,9 +115,18 @@ void Baby::readFile(){
   	lineCount++;
 	}
 
+	for(int i=0; i<32; i++)
+	{
+		control[i]=memory[1][i];
+	}
 
 	out.close();
 }
+
+void Baby::execute(){
+
+}
+
 void Baby::printMemory(){
 	for(int i = 0; i<32; i++)
 	{
