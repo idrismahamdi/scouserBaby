@@ -2,21 +2,20 @@
 
 using namespace std;
 
-struct opcode{
-	array<bool, 3> opcode;
-};
 
 class Baby {
 private:
-	bool memory[32][32];
+	int memory[32][32];
 public:
 	/* 8 actions*/ 
 	void initMemory();
-//	void Baby::fetch();
-//	void Baby::decode();
-//	void Baby::execute();
+	void increment_CI();
+	void fetch();
+	void decode();
+	void execute();
 	void readFile();
 	void printMemory();
+	void assignArray();
 	//void initOpcodes();
 
 

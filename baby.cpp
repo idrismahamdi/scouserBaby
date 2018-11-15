@@ -2,15 +2,24 @@
 #include<string>
 #include<iostream> 
 #include<fstream>
+#include <array>
+
+using namespace std;
 
 //holds the line adress in the store of where the next line will be fetched
-bool control[32];
+bool control[32]={0};
 //holds the instructions opcode
-bool present[32];
+int present[32]={0};
 //accumulator
-bool accumulator[32];
+bool accumulator[32]={0};
  
+int operand[5]={0};
 
+int decimalOperand = 1;
+
+int decimalOpcode = 0;
+
+int opcode[3]={0};
 /*
 void Baby::initOpcodes(){
 
@@ -24,11 +33,32 @@ void Baby::initOpcodes(){
 	opcode[6].input = {1,1,0};
 	opcode[7].input = {1,1,1};
 }
+*/
+
+void Baby::increment_CI()
+{
+	
+
+	for(int i = 0; i < 32; i++)
+	{
+		present[i] = memory[decimalOperand][i];
+	}
+}
+
 
 void Baby::fetch(){
+	
+	operand[0]=present[4];
+	operand[1]=present[3];
+	operand[2]=present[2];
+	operand[3]=present[1];
+	operand[4]=present[0];
 
+	opcode[0]=present[15];
+	opcode[1]=present[14];
+	opcode[2]=present[13];
 }
-*/
+
 void Baby::initMemory(){
 	for(int i = 0; i<32; i++)
 	{
@@ -37,6 +67,31 @@ void Baby::initMemory(){
 			memory[i][j] = 0;
 		}
 	}
+}
+
+void Baby::decode()
+{
+	int out=0, power=1;
+	int a = 5; //find size of operand array
+	int b = 3;	//find size of opcode array
+	for(int i=0; i<a; i++)
+	{
+		out += operand[4-i]*power;
+		power *= 2;
+	}
+	decimalOperand = out;
+	out = 0;
+	power = 1;
+	for(int i=0; i<b; i++)
+	{
+		out += opcode[2-i]*power;
+		power *= 2;
+	}
+
+	decimalOpcode = out;
+
+	cout<< decimalOperand << endl;
+	cout<< decimalOpcode << endl;
 }
 
 void Baby::readFile(){
@@ -74,7 +129,10 @@ void Baby::printMemory(){
 
 int main(){
 	Baby baby;
-	baby.initMemory();
-	baby.readFile();
-	baby.printMemory();
+	 baby.initMemory();
+	 baby.readFile();
+	// baby.printMemory();
+	baby.increment_CI();
+	baby.fetch();
+	baby.decode();
 }
