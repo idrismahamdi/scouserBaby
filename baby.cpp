@@ -13,35 +13,21 @@ int control[32]={0};
 int present[32]={0};
 //accumulator
 int accumulator[32]={0};
- 
+//global variable storing the array of operands
 int operand[5]={0};
-
+//global varable storing the decimal version of the operand
 int decimalOperand = 1;
-
+//global variable storing the decimal version of the opcode
 int decimalOpcode = 0;
-
+//global variable storing the array of opcode
 int opcode[3]={0};
-
+//memory array
 int memory[32][32];
-
+//boolean used to break loops
 bool Exit = false;
-/*
-void Baby::initOpcodes(){
-
-	//swap round code values
-	opcode[0].input = {0,0,0};
-	opcode[1].input = {0,0,1};
-	opcode[2].input = {0,1,0};
-	opcode[3].input = {0,1,1};
-	opcode[4].input = {1,0,0};
-	opcode[5].input = {1,0,1};
-	opcode[6].input = {1,1,0};
-	opcode[7].input = {1,1,1};
-}
-*/
 
 
-
+//This method increments the present line to be what the control line was 
 void Baby::increment_CI()
 {
 	for(int i = 0; i < 32; i++)
@@ -50,7 +36,7 @@ void Baby::increment_CI()
 	}
 }
 
-
+//This method saves the present's line operand and opcode
 void Baby::fetch(){
 	
 	for(int i = 0; i < 5 ; i++){
@@ -61,6 +47,7 @@ void Baby::fetch(){
 	}
 }
 
+//This method initialises the memory array
 void Baby::initMemory(){
 	for(int i = 0; i<32; i++)
 	{
@@ -68,57 +55,65 @@ void Baby::initMemory(){
 		{
 			memory[i][j] = 0;
 		}
-	}
-
-	
+	}	
 }
 
+//This method calls the binaryToDecimal method to convert the operand and the opcode to decimal
 void Baby::decode()
 {
 	decimalOperand = binaryToDecimal(operand, 5);
 	decimalOpcode = binaryToDecimal(opcode, 3);
-
-
-	cout<< decimalOperand << endl;
-	cout<< decimalOpcode << endl;
 }
 
+/*
+	This method takes three parameters: a decimal integer to be converted to binary, the size of the result array and an integer array where the binary number will be stored
+	The funcion of this method is converting from decimal to binary
+*/
 void Baby::decimalToBinary(int n, int size, int arr[]) 
 { 
-   
-    int binaryNum[1000]; 
-    int i = 0; 
-    while (n > 0) { 
-        
-        binaryNum[i] = n % 2; 
-        n = n / 2; 
-        i++; 
-    } 
-  
-  for(int i = 0; i < size; i++)
-  {
-  	arr[i]= binaryNum[i];
-  }
+	int binaryNum[1000]; 
+	int i = 0; 
+	while (n > 0) { 
+	    
+	    binaryNum[i] = n % 2; 
+	    n = n / 2; 
+	    i++; 
+	} 
+
+	for(int i = 0; i < size; i++){
+
+		arr[i]= binaryNum[i];
+	}
 } 
 
+/*
+	This method takes two parameters: an integer array where the binary number is stored and a size integer, containing the size of the array
+	The function of this method is converting from binary to decimal
+*/
 int Baby::binaryToDecimal(int arr[], int size)
 {
-
 	int out = 0;
+
 	int power = 1;
-	for(int i=0; i<size; i++)
-	{
+
+	for(int i=0; i<size; i++){
+
 		out += arr[(size-1)-i]*power;
 		power *= 2;
 	}
 	return out;
 }
 
+/*
+	This method takes an array of integers as a parameter
+	The function of this method is to return the decimal version of the operand
+*/
 int Baby::getOperand(int arr[])
 {
 	int tempOperand[5];
 	
 	for(int i = 0; i < 5 ; i++){
+
 		tempOperand[i] = present[4 - i];
 	}
 
