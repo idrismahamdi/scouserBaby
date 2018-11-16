@@ -27,7 +27,9 @@ int memory[32][32];
 bool Exit = false;
 
 
-//This method increments the present line to be what the control line was 
+/*
+	This method increments the present line to be what the control line was 
+*/
 void Baby::increment_CI()
 {
 	for(int i = 0; i < 32; i++)
@@ -36,7 +38,9 @@ void Baby::increment_CI()
 	}
 }
 
-//This method saves the present's line operand and opcode
+/*
+	This method saves the present's line operand and opcode
+*/
 void Baby::fetch(){
 	
 	for(int i = 0; i < 5 ; i++){
@@ -47,7 +51,9 @@ void Baby::fetch(){
 	}
 }
 
-//This method initialises the memory array
+/*
+	This method initialises the memory array
+*/
 void Baby::initMemory(){
 	for(int i = 0; i<32; i++)
 	{
@@ -58,7 +64,9 @@ void Baby::initMemory(){
 	}	
 }
 
-//This method calls the binaryToDecimal method to convert the operand and the opcode to decimal
+/*
+	This method calls the binaryToDecimal method to convert the operand and the opcode to decimal
+*/
 void Baby::decode()
 {
 	decimalOperand = binaryToDecimal(operand, 5);
@@ -122,99 +130,123 @@ int Baby::getOperand(int arr[])
 	return result;
 }
 
+/*
+	This method sets Control Instruction's contents to the contents of the Store location
+*/
 void Baby::jmp(){
-	
+
 	for(int i = 0; i < 32; i++)
 	{
 		control[i] = (memory[decimalOperand][i]);
 	}
 
- }
+}
 
- void Baby::jrp(){
- 	int tempControl = getOperand(control);
+/*
+	This method adds the content of Store location to Control Instruction
+*/
+void Baby::jrp(){
+	int tempControl = getOperand(control);
 
- 	int tempStore[32];
+	int tempStore[32];
 
- 	for(int i = 0; i < 32; i++)
- 	{
- 		tempStore[i] = memory[decimalOperand][i];
- 	}
+	for(int i = 0; i < 32; i++)
+	{
+		tempStore[i] = memory[decimalOperand][i];
+	}
 
- 	int storeOperand = getOperand(tempStore);
+	int storeOperand = getOperand(tempStore);
 
- 	tempControl = tempControl + storeOperand;
+	tempControl = tempControl + storeOperand;
 
- 	decimalToBinary(tempControl, 32, control);
+	decimalToBinary(tempControl, 32, control);
 
- }
+}
 
- void Baby::ldn(){
-  	
-  	int tempStore[32];
+/*
+	This method loads Accumulator with negative form of Store Content
+*/
+void Baby::ldn(){
+	
+	int tempStore[32];
 
- 	for(int i = 0; i < 32; i++)
- 	{
- 		tempStore[i] = memory[decimalOperand][i];
- 	}
+	for(int i = 0; i < 32; i++)
+	{
+		tempStore[i] = memory[decimalOperand][i];
+	}
 
- 	int storeOperand = getOperand(tempStore);
+	int storeOperand = getOperand(tempStore);
 
- 	int acc = storeOperand;
- 	decimalToBinary(acc, 32, accumulator);
- 	accumulator[31] = 1;
+	int acc = storeOperand;
+	decimalToBinary(acc, 32, accumulator);
+	accumulator[31] = 1;
+}
 
+/*
+	This method copies Accumulator to the Store location
+*/
+void Baby::sto(){
+	for(int i = 0; i < 32; i++)
+	{
+		memory[decimalOperand][i] = accumulator[i];
+	}
+	
+}
 
+/*
+	This method subtracts the content of Store location from Accumulator
+*/
+void Baby::sub(){
+	int tempStore[32];
 
- }
+	for(int i = 0; i < 32; i++)
+	{
+		tempStore[i] = memory[decimalOperand][i];
+	}
 
- void Baby::sto(){
- 	for(int i = 0; i < 32; i++)
- 	{
- 		memory[decimalOperand][i] = accumulator[i];
- 	}
- 	
- }
+	int acc = getOperand(accumulator);
+	int store = getOperand(tempStore); 
 
- void Baby::sub(){
- 	int tempStore[32];
+	int newAcc = acc - store;
 
- 	for(int i = 0; i < 32; i++)
- 	{
- 		tempStore[i] = memory[decimalOperand][i];
- 	}
+	decimalToBinary(newAcc, 32, accumulator);
 
- 	int acc = getOperand(accumulator);
- 	int store = getOperand(tempStore); 
+}
 
- 	int newAcc = acc - store;
+/*
+	This method increments Control Instruction if the Accumulator value is negative, otherwise it does not do anything
+*/
+void Baby::cmp(){
+	if(getOperand(accumulator)<0){increment_CI();}
+}
 
- 	decimalToBinary(newAcc, 32, accumulator);
+/*
+	This method sets Stop lamp and halts the machine
+*/
+void Baby::stp(){
+	Exit = true;
+}
 
- }
-
- void Baby::cmp(){
- 	if(getOperand(accumulator)<0){increment_CI();}
- }
-
- void Baby::stp(){
- 	Exit = true;
- }
-
+/*
+	This method executes different method depending on the value of decimalOpcode
+*/
 void Baby::execute()
 {
 	switch(decimalOpcode) {
-    case 0 : Baby::jmp();
-    case 1 : Baby::jrp();
-    case 2 : Baby::ldn();
-    case 3 : Baby::sto();
-    case 4 : Baby::sub();
-    case 5 : Baby::sub();
-    case 6 : Baby::cmp();
-    case 7 : Baby::stp();
-}
+	case 0 : Baby::jmp();
+	case 1 : Baby::jrp();
+	case 2 : Baby::ldn();
+	case 3 : Baby::sto();
+	case 4 : Baby::sub();
+	case 5 : Baby::sub();
+	case 6 : Baby::cmp();
+	case 7 : Baby::stp();
+	}
 }
 
+/*
+	This method reads the contents from a file to the memory array
+*/
 void Baby::readFile(){
 
 
@@ -242,7 +274,9 @@ void Baby::readFile(){
 	out.close();
 }
 
-
+/*
+	This method prints the content of the memory to the user
+*/
 void Baby::printMemory(){
 	for(int i = 0; i<32; i++)
 	{
@@ -254,6 +288,9 @@ void Baby::printMemory(){
 	}
 }
 
+/*
+	This is the main method of the class
+*/
 int main(){
 	Baby baby;
 	 baby.initMemory();
