@@ -1,10 +1,9 @@
 #include "baby.h"
-#include "opcodes.h"
 #include<string>
 #include<iostream> 
 #include<fstream>
 #include <array>
-#include <vector>
+
 using namespace std;
 
 //holds the line adress in the store of where the next line will be fetched
@@ -21,10 +20,6 @@ int decimalOperand = 1;
 int decimalOpcode = 0;
 
 int opcode[3]={0};
-
-int memory[32][32];
-
-bool Exit = false;
 /*
 void Baby::initOpcodes(){
 
@@ -42,6 +37,8 @@ void Baby::initOpcodes(){
 
 void Baby::increment_CI()
 {
+	
+
 	for(int i = 0; i < 32; i++)
 	{
 		present[i] = control[i];
@@ -51,12 +48,15 @@ void Baby::increment_CI()
 
 void Baby::fetch(){
 	
-	for(int i = 0; i < 5 ; i++){
-		operand[i] = present[4 - i];
-	}
-	for(int j = 0; j < 3; j++){
-		opcode[j]=present[15-j];
-	}
+	operand[0]=present[4];
+	operand[1]=present[3];
+	operand[2]=present[2];
+	operand[3]=present[1];
+	operand[4]=present[0];
+
+	opcode[0]=present[15];
+	opcode[1]=present[14];
+	opcode[2]=present[13];
 }
 
 void Baby::initMemory(){
@@ -73,69 +73,27 @@ void Baby::initMemory(){
 
 void Baby::decode()
 {
-	decimalOperand = binaryToDecimal(operand, 5);
-	decimalOpcode = binaryToDecimal(opcode, 3);
+	int out=0, power=1;
+	int a = 5; //find size of operand array
+	int b = 3;	//find size of opcode array
+	for(int i=0; i<a; i++)
+	{
+		out += operand[4-i]*power;
+		power *= 2;
+	}
+	decimalOperand = out;
+	out = 0;
+	power = 1;
+	for(int i=0; i<b; i++)
+	{
+		out += opcode[2-i]*power;
+		power *= 2;
+	}
 
+	decimalOpcode = out;
 
 	cout<< decimalOperand << endl;
 	cout<< decimalOpcode << endl;
-}
-
-int Baby::binaryToDecimal(int arr[], int size)
-{
-
-	int out = 0;
-	int power = 1;
-	for(int i=0; i<size; i++)
-	{
-		out += arr[(size-1)-i]*power;
-		power *= 2;
-	}
-	return out;
-}
-
-void Baby::jmp(){
-	
-		control = (memory[decimalOperand]);
-
- }
-
- void Baby::jrp(){
- 	
- }
-
- void Baby::ldn(){
- 	
- }
-
- void Baby::sto(){
- 	memory[decimalOpcode] = accumulator;
- }
-
- void Baby::sub(){
- 	
- }
-
- void Baby::cmp(){
- 	if(binaryToDecimal(accumulator)<0){increment_CI();}
- }
-
- void Baby::stp(){
- 	exit = true;
- }
-
-void Baby::execute()
-{
-	switch(decimalOpcode) {
-    case 0 : Baby::jmp();
-    case 1 : Baby::jrp();
-    case 2 : Baby::ldn();
-    case 3 : Baby::sto();
-    case 4 : Baby::sub();
-    case 5 : Baby::sub();
-    case 6 : Baby::cmp();
-    case 7 : Baby::stp();
-}
 }
 
 void Baby::readFile(){
@@ -165,6 +123,9 @@ void Baby::readFile(){
 	out.close();
 }
 
+void Baby::execute(){
+
+}
 
 void Baby::printMemory(){
 	for(int i = 0; i<32; i++)
@@ -182,9 +143,7 @@ int main(){
 	 baby.initMemory();
 	 baby.readFile();
 	// baby.printMemory();
-
-	 while (Exit = false){
+	baby.increment_CI();
 	baby.fetch();
 	baby.decode();
-	}	
 }

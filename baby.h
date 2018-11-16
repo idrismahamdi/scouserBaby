@@ -4,6 +4,8 @@ using namespace std;
 
 
 class Baby {
+private:
+	int memory[32][32];
 public:
 	/* 8 actions*/ 
 	void initMemory();
@@ -14,17 +16,7 @@ public:
 	void readFile();
 	void printMemory();
 	void assignArray();
-	int binaryToDecimal(int arr[], int size);
-	void decimalToBinary(int n);
 	//void initOpcodes();
 
-
-	void jmp();
-	void jrp();
-	void ldn();
-	void sto();
-	void sub();
-	void cmp();
-	void stp();
 
 };
