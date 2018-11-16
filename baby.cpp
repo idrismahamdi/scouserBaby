@@ -4,7 +4,7 @@
 #include<iostream> 
 #include<fstream>
 #include <array>
-
+#include <vector>
 using namespace std;
 
 //holds the line adress in the store of where the next line will be fetched
@@ -94,16 +94,9 @@ int Baby::binaryToDecimal(int arr[], int size)
 	return out;
 }
 
-void Baby::decimalToBinary(int n){
-	vector<bool> a;
-	for(i=0; n>0; i++){    
-		a[i].pushbackn%2;    
-		n= n/2;  
-	}     	
-}
 void Baby::jmp(){
 	
-		control[i] = (memory[decimalOperand]);
+		control = (memory[decimalOperand]);
 
  }
 
