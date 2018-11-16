@@ -1,4 +1,5 @@
 #include "baby.h"
+#include "opcodes.h"
 #include<string>
 #include<iostream> 
 #include<fstream>
@@ -20,6 +21,8 @@ int decimalOperand = 1;
 int decimalOpcode = 0;
 
 int opcode[3]={0};
+
+int memory[32][32];
 /*
 void Baby::initOpcodes(){
 
@@ -37,8 +40,6 @@ void Baby::initOpcodes(){
 
 void Baby::increment_CI()
 {
-	
-
 	for(int i = 0; i < 32; i++)
 	{
 		present[i] = control[i];
@@ -73,27 +74,71 @@ void Baby::initMemory(){
 
 void Baby::decode()
 {
-	int out=0, power=1;
-	int a = 5; //find size of operand array
-	int b = 3;	//find size of opcode array
-	for(int i=0; i<a; i++)
-	{
-		out += operand[4-i]*power;
-		power *= 2;
-	}
-	decimalOperand = out;
-	out = 0;
-	power = 1;
-	for(int i=0; i<b; i++)
-	{
-		out += opcode[2-i]*power;
-		power *= 2;
-	}
+	decimalOperand = binaryToDecimal(operand, 5);
+	decimalOpcode = binaryToDecimal(opcode, 3);
 
-	decimalOpcode = out;
 
 	cout<< decimalOperand << endl;
 	cout<< decimalOpcode << endl;
+}
+
+int Baby::binaryToDecimal(int arr[], int size)
+{
+
+	int out = 0;
+	int power = 1;
+	for(int i=0; i<size; i++)
+	{
+		out += arr[(size-1)-i]*power;
+		power *= 2;
+	}
+	return out;
+}
+
+void Opcode::jmp(){
+	for(int i = 0; i < 32; i++)
+	{
+		control[i] = memory[decimalOperand][i];
+	}
+
+ }
+
+ void Opcode::jrp(){
+ 	
+ }
+
+ void Opcode::ldn(){
+ 	
+ }
+
+ void Opcode::sto(){
+ 	
+ }
+
+ void Opcode::sub(){
+ 	
+ }
+
+ void Opcode::cmp(){
+ 	
+ }
+
+ void Opcode::stp(){
+ 	
+ }
+
+void Baby::execute()
+{
+	switch(decimalOpcode) {
+    case 0 : Opcode::jmp();
+    case 1 : Opcode::jtp();
+    case 2 : Opcode::ldn();
+    case 3 : Opcode::sto();
+    case 4 : Opcode::sub();
+    case 5 : Opcode::sub();
+    case 6 : Opcode::cmp();
+    case 7 : Opcode::stp();
+}
 }
 
 void Baby::readFile(){
@@ -123,9 +168,6 @@ void Baby::readFile(){
 	out.close();
 }
 
-void Baby::execute(){
-
-}
 
 void Baby::printMemory(){
 	for(int i = 0; i<32; i++)
