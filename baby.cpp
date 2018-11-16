@@ -23,6 +23,8 @@ int decimalOpcode = 0;
 int opcode[3]={0};
 
 int memory[32][32];
+
+bool Exit = false;
 /*
 void Baby::initOpcodes(){
 
@@ -49,15 +51,12 @@ void Baby::increment_CI()
 
 void Baby::fetch(){
 	
-	operand[0]=present[4];
-	operand[1]=present[3];
-	operand[2]=present[2];
-	operand[3]=present[1];
-	operand[4]=present[0];
-
-	opcode[0]=present[15];
-	opcode[1]=present[14];
-	opcode[2]=present[13];
+	for(int i = 0; i < 5 ; i++){
+		operand[i] = present[4 - i];
+	}
+	for(int j = 0; j < 3; j++){
+		opcode[j]=present[15-j];
+	}
 }
 
 void Baby::initMemory(){
@@ -95,49 +94,54 @@ int Baby::binaryToDecimal(int arr[], int size)
 	return out;
 }
 
-void Opcode::jmp(){
-	for(int i = 0; i < 32; i++)
-	{
-		control[i] = memory[decimalOperand][i];
-	}
+void Baby::decimalToBinary(int n){
+	vector<bool> a;
+	for(i=0; n>0; i++){    
+		a[i].pushbackn%2;    
+		n= n/2;  
+	}     	
+}
+void Baby::jmp(){
+	
+		control[i] = (memory[decimalOperand]);
 
  }
 
- void Opcode::jrp(){
+ void Baby::jrp(){
  	
  }
 
- void Opcode::ldn(){
+ void Baby::ldn(){
  	
  }
 
- void Opcode::sto(){
+ void Baby::sto(){
+ 	memory[decimalOpcode] = accumulator;
+ }
+
+ void Baby::sub(){
  	
  }
 
- void Opcode::sub(){
- 	
+ void Baby::cmp(){
+ 	if(binaryToDecimal(accumulator)<0){increment_CI();}
  }
 
- void Opcode::cmp(){
- 	
- }
-
- void Opcode::stp(){
- 	
+ void Baby::stp(){
+ 	exit = true;
  }
 
 void Baby::execute()
 {
 	switch(decimalOpcode) {
-    case 0 : Opcode::jmp();
-    case 1 : Opcode::jtp();
-    case 2 : Opcode::ldn();
-    case 3 : Opcode::sto();
-    case 4 : Opcode::sub();
-    case 5 : Opcode::sub();
-    case 6 : Opcode::cmp();
-    case 7 : Opcode::stp();
+    case 0 : Baby::jmp();
+    case 1 : Baby::jrp();
+    case 2 : Baby::ldn();
+    case 3 : Baby::sto();
+    case 4 : Baby::sub();
+    case 5 : Baby::sub();
+    case 6 : Baby::cmp();
+    case 7 : Baby::stp();
 }
 }
 
@@ -185,7 +189,9 @@ int main(){
 	 baby.initMemory();
 	 baby.readFile();
 	// baby.printMemory();
-	baby.increment_CI();
+
+	 while (Exit = false){
 	baby.fetch();
 	baby.decode();
+	}	
 }

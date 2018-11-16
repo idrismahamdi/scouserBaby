@@ -15,7 +15,16 @@ public:
 	void printMemory();
 	void assignArray();
 	int binaryToDecimal(int arr[], int size);
+	void decimalToBinary(int n);
 	//void initOpcodes();
 
+
+	void jmp();
+	void jrp();
+	void ldn();
+	void sto();
+	void sub();
+	void cmp();
+	void stp();
 
 };
