@@ -17,6 +17,7 @@ public:
 	int binaryToDecimal(int arr[], int size);
 	void decimalToBinary(int n, int size, int arr[]);
 	int getOperand(int arr[]);
+	void testDisplay();
 	//void initOpcodes();
 
 

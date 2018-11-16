@@ -69,8 +69,6 @@ void Baby::initMemory(){
 			memory[i][j] = 0;
 		}
 	}
-
-	
 }
 
 void Baby::decode()
@@ -83,15 +81,15 @@ void Baby::decode()
 	cout<< decimalOpcode << endl;
 }
 
-void Baby::decimalToBinary(int n, int size, int arr[]) 
+void Baby::decimalToBinary(int numberToConvert, int size, int arr[]) 
 { 
    
     int binaryNum[1000]; 
     int i = 0; 
-    while (n > 0) { 
+    while (numberToConvert > 0) { 
         
-        binaryNum[i] = n % 2; 
-        n = n / 2; 
+        binaryNum[i] = numberToConvert % 2; 
+        numberToConvert = numberToConvert / 2; 
         i++; 
     } 
   
@@ -103,7 +101,6 @@ void Baby::decimalToBinary(int n, int size, int arr[])
 
 int Baby::binaryToDecimal(int arr[], int size)
 {
-
 	int out = 0;
 	int power = 1;
 	for(int i=0; i<size; i++)
@@ -123,6 +120,11 @@ int Baby::getOperand(int arr[])
 	}
 
 	int result = binaryToDecimal(tempOperand, 5);
+
+	if(accumulator[31] == 1)
+	{
+		result = -result;
+	}
 
 	return result;
 }
@@ -169,8 +171,6 @@ void Baby::jmp(){
  	decimalToBinary(acc, 32, accumulator);
  	accumulator[31] = 1;
 
-
-
  }
 
  void Baby::sto(){
@@ -210,13 +210,31 @@ void Baby::execute()
 {
 	switch(decimalOpcode) {
     case 0 : Baby::jmp();
+    		break;
     case 1 : Baby::jrp();
+    		break;
     case 2 : Baby::ldn();
+    		break;
     case 3 : Baby::sto();
+    		break;
     case 4 : Baby::sub();
+    		break;
     case 5 : Baby::sub();
+    		break;
     case 6 : Baby::cmp();
+    		break;
     case 7 : Baby::stp();
+    		break;
+    		default: cout << "no opcode found" << endl;
+    		break;
+
+     // We need to remember in the execute function to set the control 
+     // instruction array to the memory array at the position of the operand
+  
+      for(int i = 0; i < 5; i++ )
+    {
+    	control[i] = memory[decimalOperand][i];
+    }
 }
 }
 
@@ -266,7 +284,10 @@ int main(){
 	// baby.printMemory();
 
 	 while (Exit == false){
+	baby.increment_CI();
 	baby.fetch();
 	baby.decode();
+	baby.execute();
+	
 	}	
 }
