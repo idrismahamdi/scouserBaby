@@ -1,7 +1,7 @@
 #include "baby.h"
 #include "opcodes.h"
 #include<string>
-#include<iostream> 
+#include<iostream>
 #include<fstream>
 #include <array>
 #include <vector>
@@ -13,7 +13,7 @@ int control[32]={0};
 int present[32]={0};
 //accumulator
 int accumulator[32]={0};
- 
+
 int operand[5]={0};
 
 int decimalOperand = 1;
@@ -25,6 +25,8 @@ int opcode[3]={0};
 int memory[32][32];
 
 bool Exit = false;
+
+bool testFlop = false;
 /*
 void Baby::initOpcodes(){
 
@@ -42,17 +44,31 @@ void Baby::initOpcodes(){
 
 
 
-void Baby::increment_CI()
+void Baby::setPresent()
 {
 	for(int i = 0; i < 32; i++)
 	{
 		present[i] = control[i];
 	}
 }
+void Baby::increment_CI()
+{
+  int temp = getOperand(control);
+
+  if(testFlop == true)
+  {
+    temp += 2;
+  }
+  else
+  {
+    temp++;
+  }
+  decimalToBinary(temp, 5, control);
+}
 
 
 void Baby::fetch(){
-	
+
 	for(int i = 0; i < 5 ; i++){
 		operand[i] = present[4 - i];
 	}
@@ -75,29 +91,25 @@ void Baby::decode()
 {
 	decimalOperand = binaryToDecimal(operand, 5);
 	decimalOpcode = binaryToDecimal(opcode, 3);
-
-
-	cout<< decimalOperand << endl;
-	cout<< decimalOpcode << endl;
 }
 
-void Baby::decimalToBinary(int numberToConvert, int size, int arr[]) 
-{ 
-   
-    int binaryNum[1000]; 
-    int i = 0; 
-    while (numberToConvert > 0) { 
-        
-        binaryNum[i] = numberToConvert % 2; 
-        numberToConvert = numberToConvert / 2; 
-        i++; 
-    } 
-  
+void Baby::decimalToBinary(int numberToConvert, int size, int arr[])
+{
+
+    int binaryNum[1000];
+    int i = 0;
+    while (numberToConvert > 0) {
+
+        binaryNum[i] = numberToConvert % 2;
+        numberToConvert = numberToConvert / 2;
+        i++;
+    }
+
   for(int i = 0; i < size; i++)
   {
   	arr[i]= binaryNum[i];
   }
-} 
+}
 
 int Baby::binaryToDecimal(int arr[], int size)
 {
@@ -114,7 +126,7 @@ int Baby::binaryToDecimal(int arr[], int size)
 int Baby::getOperand(int arr[])
 {
 	int tempOperand[5];
-	
+
 	for(int i = 0; i < 5 ; i++){
 		tempOperand[i] = present[4 - i];
 	}
@@ -130,7 +142,7 @@ int Baby::getOperand(int arr[])
 }
 
 void Baby::jmp(){
-	
+
 	for(int i = 0; i < 32; i++)
 	{
 		control[i] = (memory[decimalOperand][i]);
@@ -157,7 +169,7 @@ void Baby::jmp(){
  }
 
  void Baby::ldn(){
-  	
+
   	int tempStore[32];
 
  	for(int i = 0; i < 32; i++)
@@ -178,7 +190,7 @@ void Baby::jmp(){
  	{
  		memory[decimalOperand][i] = accumulator[i];
  	}
- 	
+
  }
 
  void Baby::sub(){
@@ -190,7 +202,7 @@ void Baby::jmp(){
  	}
 
  	int acc = getOperand(accumulator);
- 	int store = getOperand(tempStore); 
+ 	int store = getOperand(tempStore);
 
  	int newAcc = acc - store;
 
@@ -199,7 +211,10 @@ void Baby::jmp(){
  }
 
  void Baby::cmp(){
- 	if(getOperand(accumulator)<0){increment_CI();}
+   if(accumulator[31] == 1)
+   {
+     testFlop = true;
+   }
  }
 
  void Baby::stp(){
@@ -210,27 +225,34 @@ void Baby::execute()
 {
 	switch(decimalOpcode) {
     case 0 : Baby::jmp();
+        cout << "jmp" << endl;
     		break;
     case 1 : Baby::jrp();
+        cout << "jrp" << endl;
     		break;
     case 2 : Baby::ldn();
+        cout << "ldn" << endl;
     		break;
     case 3 : Baby::sto();
+        cout << "sto" << endl;
     		break;
     case 4 : Baby::sub();
+        cout << "sub" << endl;
     		break;
     case 5 : Baby::sub();
+        cout << "sub" << endl;
     		break;
     case 6 : Baby::cmp();
+        cout << "cmp" << endl;
     		break;
     case 7 : Baby::stp();
     		break;
-    		default: cout << "no opcode found" << endl;
+    default: cout << "no opcode found" << endl;
     		break;
 
-     // We need to remember in the execute function to set the control 
+     // We need to remember in the execute function to set the control
      // instruction array to the memory array at the position of the operand
-  
+
       for(int i = 0; i < 5; i++ )
     {
     	control[i] = memory[decimalOperand][i];
@@ -245,7 +267,7 @@ void Baby::readFile(){
 	string line;
 	ifstream out("BabyTest1-MC.txt");
 	int lineCount = 0;
-	
+
 	while(getline(out, line))
 	{
 		for(int i = 0; i < 32; i++) {
@@ -277,17 +299,52 @@ void Baby::printMemory(){
 	}
 }
 
+void Baby::display()
+{
+  cout << "Control instruction: ";
+  for(int i = 0; i < 32; i++)
+  {
+    cout << control[i];
+  }
+
+  cout << " present: ";
+  for(int i = 0; i < 32; i++)
+  {
+    cout << present[i];
+  }
+
+  cout << " operand: ";
+  for(int i = 0; i < 5; i++) 
+  {
+    cout << operand[i];
+  }
+
+  cout << " opcode: ";
+  for(int i = 0; i < 3; i++)
+	{
+		cout << opcode[i];
+	}
+  cout << ""<< endl;
+
+  cout << "decimalOperand: "<< decimalOperand << endl;
+  cout << "decimalOpcode: "<< decimalOpcode << endl;
+}
+
 int main(){
 	Baby baby;
 	 baby.initMemory();
 	 baby.readFile();
 	// baby.printMemory();
 
-	 while (Exit == false){
-	baby.increment_CI();
-	baby.fetch();
-	baby.decode();
-	baby.execute();
-	
-	}	
+	// while (Exit == false){
+
+  for(int i = 0; i < 4; i++)
+  {
+	   baby.setPresent();
+     baby.increment_CI();
+	   baby.fetch();
+	   baby.decode();
+	   baby.execute();
+     baby.display();
+	}
 }

@@ -5,8 +5,9 @@ using namespace std;
 
 class Baby {
 public:
-	/* 8 actions*/ 
+	/* 8 actions*/
 	void initMemory();
+	void setPresent();
 	void increment_CI();
 	void fetch();
 	void decode();
@@ -18,6 +19,7 @@ public:
 	void decimalToBinary(int n, int size, int arr[]);
 	int getOperand(int arr[]);
 	void testDisplay();
+	void display();
 	//void initOpcodes();
 
 
