@@ -21,6 +21,8 @@ public:
 	void createMachineCode();
 	int findVarName(string varName);
 	vector<bool> decimalToBinary(int);
+	void displayMachineCode();
+	void insertLine(int, vector<bool> ,vector<bool>);
 
   vector<LookUpNode> lookUpTable;
 	vector<vector<bool>> machineCode;
@@ -28,11 +30,11 @@ public:
 
 void Assembler::init(){
  lookUpTable.resize(32);
+
 	machineCode.resize(32);
 	for (vector<bool> nodeList : machineCode){
 			nodeList.resize(32);
 		}
-
 }
 
 
@@ -67,19 +69,18 @@ int lineNum = 0;
 if(codeLine!=""){
 				istringstream iss(codeLine);
 		    for(string codeLine; iss >> codeLine; ){
-				//	cout << codeLine << endl;
+
 
 				if(testOperand(codeLine) != true && getVariable != true){
 					lookUpTable.at(lineNum).setVarNam(codeLine.substr(0, codeLine.size()-1));
 				}
 				if(getVariable == true){
-					std::cout << "inLoop" << '\n';
+
 						lookUpTable.at(lineNum).setVariableNumber(codeLine);
 						getVariable = false;
 				}
 					if(testOperand(codeLine)==true){
 						lookUpTable.at(lineNum).setName(codeLine);
-						std::cout << lineNum<< '\n';
 						lookUpTable.at(lineNum).setlineNumber(lineNum);
 						getVariable = true;
 					}
@@ -91,12 +92,6 @@ if(codeLine!=""){
 					}
 				}
 
-				cout <<  "Opcode: "<<lookUpTable.at(lineNum).getName() << endl;
-				cout <<  "Line Number: "<<lookUpTable.at(lineNum).getlineNumber() << endl;
-				cout <<  "START: " <<lookUpTable.at(lineNum).getStart() << endl;
-				cout <<  "End: "<<lookUpTable.at(lineNum).getEnd() << endl;
-				cout <<  "variable Number "<<lookUpTable.at(lineNum).getVariableNumber() << endl;
-				cout <<  "var Name "<<lookUpTable.at(lineNum).getVarNam() << endl;
 
 				lineNum++;
 }
@@ -112,35 +107,28 @@ if(codeLine!=""){
 bool Assembler::testOperand(string substring){
 
   if(!substring.compare("JMP")){
-    cout <<"Successful process of substring: " <<substring << endl;
 		return true;
 	}
   else if(!substring.compare("JRP")){
-    cout <<"Successful process of substring: " <<substring << endl;
 		return true;
   }
   else if(!substring.compare("LDN")){
-    cout <<"Successful process of substring: " <<substring << endl;
+
 		return true;
 	}
   else if(!substring.compare("STO")){
-    cout <<"Successful process of substring: " <<substring << endl;
 		return true;
 	}
   else if(!substring.compare("SUB")){
-    cout <<"Successful process of substring: " <<substring << endl;
 		return true;
 	}
   else if(!substring.compare("CMP")){
-    cout <<"Successful process of substring: " <<substring << endl;
 		return true;
 	}
   else if(!substring.compare("STP")){
-    cout <<"Successful process of substring: " <<substring << endl;
 		return true;
 	}
 	else if(!substring.compare("VAR")){
-		cout <<"Successful process of substring:	 " <<substring << endl;
 		return true;
 	}else{
 		return false;
@@ -151,39 +139,77 @@ void Assembler::createMachineCode(){
 
 	for (LookUpNode &node : lookUpTable) {
 		if(!node.getName().compare("JMP")){
-
+			int lineRef = findVarName(node.getVariableNumber());
+			vector<bool> binary = this->decimalToBinary(lineRef);
+			vector<bool> opcode = {0,0,0};
+			insertLine(node.getlineNumber(),binary,opcode);
 		}
 	  else if(!node.getName().compare("JRP")){
-			std::cout << "cunt monkey2" << '\n';
+			int lineRef = findVarName(node.getVariableNumber());
+			vector<bool> binary = this->decimalToBinary(lineRef);
+			vector<bool> opcode = {1,0,0};
+			insertLine(node.getlineNumber(),binary,opcode);
 	  }
 	  else if(!node.getName().compare("LDN")){
 			int lineRef = findVarName(node.getVariableNumber());
 			vector<bool> binary = this->decimalToBinary(lineRef);
-			int lineIndex = 0;
-			for (unsigned int i = 0; i < binary.size(); i++){
-				machineCode(node.getlineNumber()).push_back(binary.at(i));
-			}
+			vector<bool> opcode = {0,1,0};
+			insertLine(node.getlineNumber(),binary,opcode);
 
-
-			cout << lineRef << endl;
 		}
 	  else if(!node.getName().compare("STO")){
-			std::cout << "cunt monkey4" << '\n';
+			int lineRef = findVarName(node.getVariableNumber());
+			vector<bool> binary = this->decimalToBinary(lineRef);
+			vector<bool> opcode = {1,1,0};
+			insertLine(node.getlineNumber(),binary,opcode);
 		}
 	  else if(!node.getName().compare("SUB")){
-			std::cout << "cunt monkey5" << '\n';
+			int lineRef = findVarName(node.getVariableNumber());
+			vector<bool> binary = this->decimalToBinary(lineRef);
+			vector<bool> opcode = {0,0,1};
+			insertLine(node.getlineNumber(),binary,opcode);
 		}
 	  else if(!node.getName().compare("CMP")){
-			std::cout << "cunt monkey6" << '\n';
+			int lineRef = findVarName(node.getVariableNumber());
+			vector<bool> binary = this->decimalToBinary(lineRef);
+			vector<bool> opcode = {0,1,1};
+			insertLine(node.getlineNumber(),binary,opcode);
 		}
 	  else if(!node.getName().compare("STP")){
-			std::cout << "cunt monkey7" << '\n';
+			vector<bool> binary{0,0,0};
+			vector<bool> opcode = {1,1,1};
+			insertLine(node.getlineNumber(),binary,opcode);
 		}
 		else if(!node.getName().compare("VAR")){
-			std::cout << "cunt monkey8" << '\n';
-		}
+			stringstream intVal(node.getVariableNumber());
+    int x = 0;
+    intVal >> x;
 
+			vector<bool> binary  = this->decimalToBinary(x);
+			int lineNumber = node.getlineNumber();
+			for (unsigned int i = 0; i < 32; i++){
+			if(i < binary.size()){
+				machineCode.at(lineNumber).push_back(binary.at(i));
+			}else{
+				machineCode.at(lineNumber).push_back(0);
+			}
+		}
 	}
+}
+}
+
+void Assembler::insertLine(int lineNumber, vector<bool> binary,vector<bool> opcode){
+	int j = 0;
+	for (unsigned int i = 0; i < 32; i++){
+			if(i < binary.size()){
+				machineCode.at(lineNumber).push_back(binary.at(i));
+			}else if( i >12 && i <16){
+					machineCode.at(lineNumber).push_back(opcode.at(j));
+					j++;
+			}else{
+					machineCode.at(lineNumber).push_back(0);
+			}
+		}
 }
 
 int Assembler::findVarName(string varName){
@@ -209,11 +235,23 @@ vector<bool> Assembler::decimalToBinary(int numberToConvert)
     }
 		return binaryNum;
 }
+void Assembler::displayMachineCode(){
+	for (unsigned int i =0; i < machineCode.size(); i++)
+	{
+		for(unsigned int j = 0; j < machineCode.at(i).size(); j++)
+		{
+			cout << machineCode.at(i).at(j);
+		}
+		cout << endl;
+	}
+}
+
 
 int main(){
   Assembler ass;
 	ass.init();
   ass.readSource();
 	ass.createMachineCode();
+	ass.displayMachineCode();
   return 0;
 }
