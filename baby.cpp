@@ -366,6 +366,12 @@ void Baby::decode()
 	//gets the binary from the tempOperand and present and sets them to their correct decimal value.
 	decimalPresent = binaryToDecimal(present);
 	currentOperand = binaryToDecimal(tempOperand);
+
+	cout << endl;
+	cout << "Decode: "<< endl;
+	cout << "The operand was " << currentOperand << " during decode" << endl;
+
+	cout << endl;
 }
 
 //Displays the state of the memory at the end of each loop
@@ -376,7 +382,7 @@ void Baby::displayEverything()
 	int decimalPresent = getLineDecimal(present);
 
 	cout << "The accumulator was " << decimalAccumulator <<  " in the loop where the control instruction was " << controlDecimal << endl;
-	cout << "The present was " << decimalPresent <<  " in the loop where the control instruction was " << controlDecimal << endl;
+	cout << "The present instruction was " << decimalPresent <<  " in the loop where the control instruction was " << controlDecimal << endl;
 
 	cout << "This was the memory state in the loop where the control instruction was " << controlDecimal << endl;
 	//Prints out the whole memory
