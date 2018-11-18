@@ -1,6 +1,5 @@
 #include "baby.h"
-//The store of memory for the program
-
+//The store of memory for the program 
 store memory (32, line(32,0));
 // stores the current/next address to be processed
 line controlInstruction(32, 0);
@@ -33,11 +32,13 @@ bool Exit = false;
 //Tested and working
 int Baby::binaryToDecimal(line vec)
 {
-	
+	//Gets the size of the vector
 	int size = vec.size();
 
 	int j =0;
 
+	//This for loop flips the vector around so that when the binary 
+	//is converted it is interpreted as big-endian
 	for (int i = 0; i < (size / 2); i++) {
         float temporary = vec[i];             
         vec[i] = vec[(size - 1) - i];
@@ -46,6 +47,7 @@ int Baby::binaryToDecimal(line vec)
 
 	int out = 0;
 	int power = 1;
+	//This converts the binary to decimal and stores it using the variable out
 	for(int i=0; i<size; i++)
 	{
 		out += vec[(size - 1) - i]*power;
@@ -66,8 +68,7 @@ line Baby::decimalToBinary(int numberToConvert)
     line result(32, 0);
     int i=0,r;
 
-   
-	 
+    //this converts the number from decimal to the binary array
 	 while(numberToConvert!=0)
 	{
 	  r = numberToConvert%2;
@@ -75,15 +76,11 @@ line Baby::decimalToBinary(int numberToConvert)
 	  numberToConvert /= 2;
 	}
 
-  for(int i = 0; i < 32; i++)
-  {
-  	if(binaryNum[i] != 1)
+	//this ensures that the vector that is returned is only of size 32
+	for(int i = 0; i < 32; i++)
   	{
-  		binaryNum[i] = 0;
-  	}
-
   	result[i]= binaryNum[i];
-  }
+  	}
 
   return result;
 }
@@ -93,18 +90,24 @@ line Baby::decimalToBinary(int numberToConvert)
 // Tested and working for vectors
 void Baby::incrementCI()
 {
-	int controlDecimal = binaryToDecimal(controlInstruction);
+	//gets the decimal number from the control instruction
+	int controlDecimal = getLineDecimal(controlInstruction);
 
+	//checks to see if the testFlop boolean has been set to true, which is done in the CMP function
+	//if the number in the accumulator is negative. If it is 2 is added to the control instruction.
 	if(testFlop == true)
 	{
 		controlDecimal = controlDecimal + 2;
+		testFlop = false;
 	}
 
+	//Otherwise only 1 is added to the control instruction
 	else
 	{
 		controlDecimal = controlDecimal + 1;
 	}
 
+	//sets the control instruction vector to the new decimal value converted to binary.
 	controlInstruction = decimalToBinary(controlDecimal);
 }
 
@@ -115,15 +118,20 @@ void Baby::fetch()
 {
 	int controlDecimal = binaryToDecimal(controlInstruction);
 
+	//Takes the first 5 elements from the memory at the current address in the control instruction and places
+	//it into a temporary operand.
 	for(int i = 0; i < 5 ; i++){
 		tempOperand[i] = memory[controlDecimal][i];
 	}
 	
+	//Sets the opcode from the memory at the current address in the control instruction and places it into present.
 	for(int j = 13; j < 16; j++){
 		present[j - 13] = memory[controlDecimal][j];
 	}
 }
 
+//Checks the decimal version of present and uses this number to call the correct function corresponding 
+//to the instruction set.
 void Baby::execute()
 {
 	switch(decimalPresent) {
@@ -159,20 +167,27 @@ void Baby::execute()
 //Set the control instruction to the contents at the location of the store 
 void Baby::JMP()
 {
+	//sets a temporary line variable to the the memory at the address of the control instruction in binary
 	line tempLine = getCurrentMemoryLine();
+	//sets a temporary variable to hold the decimal representation of tempLine.
 	int decimalStore = getLineDecimal(tempLine);
 
+	//If the decimal number at the store has somehow become negative, it will be set back to positive
 	if(decimalStore < 0)
 		decimalStore = -decimalStore;
 
+	//The binary control instruction is set back using the decimal number being converted to binary.
 	controlInstruction = decimalToBinary(decimalStore);
 }
 
 //Adds the content of the store to the control instruction
 void Baby::JRP()
 {
+	//sets a temporary line variable to the the memory at the address of the control instruction in binary
 	line tempLine = getCurrentMemoryLine();
+	//sets a temporary variable to hold the decimal representation of tempLine.
 	int decimalStore = getLineDecimal(tempLine);
+	//Gets the decimal of the control line
 	int decimalControl = getLineDecimal(controlInstruction);
 
 	int result = decimalControl + decimalStore;
@@ -188,22 +203,30 @@ void Baby::JRP()
 //copies the accumulator to the store location
 void Baby::STO()
 {
+	//Gets the decimal of the accumulator and holds it in a decimal temporary variable
 	int decimalAccumulator = getLineDecimal(accumulator);
+	//bool used to show whether or not the number is negative.
 	bool negative = false;
 
+	//checks to see if the number is negative
 	if(decimalAccumulator < 0)
 	{
+		//If it is then make it positive so it can be properly added back to the store location.
 		decimalAccumulator = -decimalAccumulator;
+		//Sets the negative boolean to true so it can be used further down.
 		negative = true;
 	}
 
 	line tempLine = decimalToBinary(decimalAccumulator);
 
+	//If the number is negative the 32nd bit in the line is set to 1. this is used to act kind of like
+	//a signed bit, to show that a number is negative. 
 	if(negative == true)
 	{
 		tempLine[31] = 1;
 	}
 
+	//sets the specified line in the store to the temporary line variable 
 	for(int i = 0; i < 32; i++)
 	{
 		memory[currentOperand][i] = tempLine[i];
@@ -213,24 +236,28 @@ void Baby::STO()
 //Sets the accumulator to the negative of the contents of the store.
 void Baby::LDN()
 {
+	//Gets the contents of the store first as binary then converts to decimal.
 	line tempLine = getCurrentMemoryLine();
-
 	int decimalStore = getLineDecimal(tempLine);
 
+	//sets the accumulator to the number from the store
 	accumulator = decimalToBinary(decimalStore);
+	//sets the last bit to 1 to show the number is negative.
 	accumulator[31] = 1;
 }
 
 //sets the accumulator to the contents of the accumulator minus the contents of the store.
 void Baby::SUB()
 {
+	//gets the number from the vector accumulator and holds it as a decimal
 	int decimalAccumulator = getLineDecimal(accumulator);
 
+	//gets the line from the store in binary and converts to the decimal.
 	line tempLine = getCurrentMemoryLine();
-
 	int decimalStore = getLineDecimal(tempLine);
 
 	int result = decimalAccumulator - decimalStore;
+	//Checking to see if the result is negative so it can be correctly added back to the accumulator
 	if(result < 0)
 	{
 		result = -result;
@@ -248,13 +275,15 @@ void Baby::SUB()
 void Baby::CMP()
 {
 	int decimalAccumulator = getLineDecimal(accumulator);
+	//Checks to see if the accumulator is negative and if it is the test flop boolean is set to true,
+	//So that the increment CI function increments by two if it is.
 	if(decimalAccumulator < 0)
 	{
 		testFlop = true;
 	}
 }
 
-//Used to break the loop
+//Used to break the loop when the stop command is reached
 void Baby::STP()
 {
 	Exit = true;
@@ -263,8 +292,10 @@ void Baby::STP()
 //Returns the line from the current address in memory.
 line Baby::getCurrentMemoryLine()
 {
+	//Creates a vector to return.
 	line tempLine(32, 0);
 
+	//sets the tempLine vector to be the same as the vector of the current address in memory. 
 	for(int i = 0; i < 32; i++)
 	{
 		tempLine[i] = memory[currentOperand-1][i];
@@ -276,13 +307,18 @@ line Baby::getCurrentMemoryLine()
 //Returns the decimal of the line vector that is passed into them.
 int Baby::getLineDecimal(line vec)
 {
+	//Creates variable to hold the result to return
 	int decimalVec;
 
+	//checks to see if the number is negative
 	if(vec[31] == 1)
 	{
+		//sets the last bit back to 0 so the number can be converted to decimal properly
 		vec[31] = 0;
 		decimalVec = binaryToDecimal(vec);
+		//sets the currently positive decimal number to negative.
 		decimalVec = -decimalVec;
+		//sets the last bit in the vector back to one so that it is still represented as negative.
 		vec[31] = 1;
 	}
 
@@ -301,31 +337,33 @@ int Baby::getLineDecimal(line vec)
 void Baby::readFile(){
 	char letter;
 	string line;
+	//opens the file to be read from
 	ifstream out("BabyTest1-MC.txt");
 	int lineCount = 0;
 
+	//while the next line is not null
 	while(getline(out, line))
 	{
+		//for each line of the vector
 		for(int i = 0; i < 32; i++) {
+		//variable takes the int from the char and subtracts 48, so that value is just the number.
 		int value;
 		value = line.at(i) - 48;
+		//sets the memory location in the store to the 
 		memory[lineCount][i] = value;
   		}
 
   	lineCount++;
 	}
 
-	for(int i=0; i<32; i++)
-	{
-		controlInstruction[i]=memory[0][i];
-	}
-
+	//closes the file again
 	out.close();
 }
 
 //sets the present and operand to the correct number.
 void Baby::decode()
 {
+	//gets the binary from the tempOperand and present and sets them to their correct decimal value.
 	decimalPresent = binaryToDecimal(present);
 	currentOperand = binaryToDecimal(tempOperand);
 }
@@ -336,6 +374,7 @@ void Baby::displayEverything()
 	int controlDecimal = getLineDecimal(controlInstruction);
 
 	cout << "This was the memory state when the control instruction was " << controlDecimal << endl;
+	//Prints out the whole memory
 	for (int i =0; i < 32; i++)
 	{
 		for(int j = 0; j < 32; j++)
@@ -354,6 +393,8 @@ int main()
 
 	baby.readFile();
 
+	//This loop runs the whole simulation, and will only break when the STP function is reached in
+	//The source file.
 	while(Exit == false)
 	{
 		baby.incrementCI();

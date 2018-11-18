@@ -29,6 +29,4 @@ class Baby{
 	line getCurrentMemoryLine();
 	int getLineDecimal(line vec);
 	void displayEverything();
-
-
 };
