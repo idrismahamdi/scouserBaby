@@ -11,6 +11,7 @@
 #include <iterator>
 using namespace std;
 typedef vector<string> seperatedLine;
+
 class Assembler {
 
 public:
@@ -27,6 +28,10 @@ public:
 
 void Assembler::init(){
  lookUpTable.resize(32);
+	machineCode.resize(32);
+	for (vector<bool> nodeList : machineCode){
+			nodeList.resize(32);
+		}
 
 }
 
@@ -154,6 +159,11 @@ void Assembler::createMachineCode(){
 	  else if(!node.getName().compare("LDN")){
 			int lineRef = findVarName(node.getVariableNumber());
 			vector<bool> binary = this->decimalToBinary(lineRef);
+			int lineIndex = 0;
+			for (unsigned int i = 0; i < binary.size(); i++){
+				machineCode(node.getlineNumber()).push_back(binary.at(i));
+			}
+
 
 			cout << lineRef << endl;
 		}
