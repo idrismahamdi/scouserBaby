@@ -334,7 +334,7 @@ int Baby::getLineDecimal(line vec)
 
 //Reads the file in initialise each vector line.
 //working with vectors
-void Baby::readFile(){
+void Baby::readFile(fileName){
 	char letter;
 	string line;
 	//opens the file to be read from
@@ -366,6 +366,12 @@ void Baby::decode()
 	//gets the binary from the tempOperand and present and sets them to their correct decimal value.
 	decimalPresent = binaryToDecimal(present);
 	currentOperand = binaryToDecimal(tempOperand);
+
+	cout << endl;
+	cout << "Decode: "<< endl;
+	cout << "The operand was " << currentOperand << " during decode" << endl;
+
+	cout << endl;
 }
 
 //Displays the state of the memory at the end of each loop
@@ -376,7 +382,7 @@ void Baby::displayEverything()
 	int decimalPresent = getLineDecimal(present);
 
 	cout << "The accumulator was " << decimalAccumulator <<  " in the loop where the control instruction was " << controlDecimal << endl;
-	cout << "The present was " << decimalPresent <<  " in the loop where the control instruction was " << controlDecimal << endl;
+	cout << "The present instruction was " << decimalPresent <<  " in the loop where the control instruction was " << controlDecimal << endl;
 
 	cout << "This was the memory state in the loop where the control instruction was " << controlDecimal << endl;
 	//Prints out the whole memory
@@ -390,12 +396,12 @@ void Baby::displayEverything()
 	}
 }
 
-void runBaby()
+void runBaby(string fileName)
 {
 	//Creates a new instance of Baby to start the simulation.
 	Baby newBaby;
 
-	newBaby.readFile();
+	newBaby.readFile(fileName);
 
 	//This loop runs the whole simulation, and will only break when the STP function is reached in
 	//The source file.
@@ -408,6 +414,7 @@ void runBaby()
 		newBaby.displayEverything();
 	}
 }
+
 
 int main()
 {
