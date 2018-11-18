@@ -356,7 +356,7 @@ void Baby::readFile(){
   	lineCount++;
 	}
 
-	//closes the file again
+	//closes the file again.
 	out.close();
 }
 
@@ -372,6 +372,11 @@ void Baby::decode()
 void Baby::displayEverything()
 {
 	int controlDecimal = getLineDecimal(controlInstruction);
+	int decimalAccumulator = getLineDecimal(accumulator);
+	int decimalPresent = getLineDecimal(present);
+
+	cout << "The accumulator was " << decimalAccumulator <<  " when the control instruction was " << controlDecimal << endl;
+	cout << "The present was " << decimalPresent <<  " when the control instruction was " << controlDecimal << endl;
 
 	cout << "This was the memory state when the control instruction was " << controlDecimal << endl;
 	//Prints out the whole memory
@@ -383,8 +388,6 @@ void Baby::displayEverything()
 		}
 		cout << endl;
 	}
-
-	
 }
 
 int main()
