@@ -334,7 +334,7 @@ int Baby::getLineDecimal(line vec)
 
 //Reads the file in initialise each vector line.
 //working with vectors
-void Baby::readFile(){
+void Baby::readFile(fileName){
 	char letter;
 	string line;
 	//opens the file to be read from
@@ -396,12 +396,12 @@ void Baby::displayEverything()
 	}
 }
 
-void runBaby()
+void runBaby(string fileName)
 {
 	//Creates a new instance of Baby to start the simulation.
 	Baby newBaby;
 
-	newBaby.readFile();
+	newBaby.readFile(fileName);
 
 	//This loop runs the whole simulation, and will only break when the STP function is reached in
 	//The source file.
@@ -414,6 +414,7 @@ void runBaby()
 		newBaby.displayEverything();
 	}
 }
+
 
 int main()
 {
