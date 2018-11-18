@@ -203,7 +203,7 @@ void Baby::JRP()
 //copies the accumulator to the store location
 void Baby::STO()
 {
-	//Gets the decimal of the accumulator and holds it in a decimal temporary variable
+	//Gets t he decimal of the accumulator and holds it in a decimal temporary variable
 	int decimalAccumulator = getLineDecimal(accumulator);
 	//bool used to show whether or not the number is negative.
 	bool negative = false;
@@ -298,7 +298,7 @@ line Baby::getCurrentMemoryLine()
 	//sets the tempLine vector to be the same as the vector of the current address in memory. 
 	for(int i = 0; i < 32; i++)
 	{
-		tempLine[i] = memory[currentOperand][i];
+		tempLine[i] = memory[currentOperand ][i];
 	}
 
 	return tempLine;
@@ -375,10 +375,10 @@ void Baby::displayEverything()
 	int decimalAccumulator = getLineDecimal(accumulator);
 	int decimalPresent = getLineDecimal(present);
 
-	cout << "The accumulator was " << decimalAccumulator <<  " when the control instruction was " << controlDecimal << endl;
-	cout << "The present was " << decimalPresent <<  " when the control instruction was " << controlDecimal << endl;
+	cout << "The accumulator was " << decimalAccumulator <<  " in the loop where the control instruction was " << controlDecimal << endl;
+	cout << "The present was " << decimalPresent <<  " in the loop where the control instruction was " << controlDecimal << endl;
 
-	cout << "This was the memory state when the control instruction was " << controlDecimal << endl;
+	cout << "This was the memory state in the loop where the control instruction was " << controlDecimal << endl;
 	//Prints out the whole memory
 	for (int i =0; i < 32; i++)
 	{
@@ -390,22 +390,28 @@ void Baby::displayEverything()
 	}
 }
 
-int main()
+void runBaby()
 {
-	Baby baby;
+	//Creates a new instance of Baby to start the simulation.
+	Baby newBaby;
 
-	baby.readFile();
+	newBaby.readFile();
 
 	//This loop runs the whole simulation, and will only break when the STP function is reached in
 	//The source file.
 	while(Exit == false)
 	{
-		baby.incrementCI();
-		baby.fetch();
-		baby.decode();
-		baby.execute();
-		baby.displayEverything();
+		newBaby.incrementCI();
+		newBaby.fetch();
+		newBaby.decode();
+		newBaby.execute();
+		newBaby.displayEverything();
 	}
+}
+
+int main()
+{
+	runBaby();
 
 	return 0;
 }
