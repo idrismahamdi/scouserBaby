@@ -8,6 +8,7 @@
 #include <istream>
 #include <sstream>
 #include <algorithm>
+#include<fstream>
 #include <iterator>
 using namespace std;
 typedef vector<string> seperatedLine;
@@ -15,7 +16,7 @@ typedef vector<string> seperatedLine;
 class Assembler {
 
 public:
-	void readSource();
+	void readSource(string);
   bool testOperand(string);
 	void init();
 	void createMachineCode();
@@ -23,6 +24,8 @@ public:
 	vector<bool> decimalToBinary(int);
 	void displayMachineCode();
 	void insertLine(int, vector<bool> ,vector<bool>);
+	void printTofile(string);
+	Assembler();
 
   vector<LookUpNode> lookUpTable;
 	vector<vector<bool>> machineCode;
@@ -38,10 +41,10 @@ void Assembler::init(){
 }
 
 
-void Assembler::readSource()
+void Assembler::readSource(string fileName)
 {
 string line;
-ifstream out("BabyTest1-Assembler.txt");
+ifstream out(fileName);
 std::string delimiter = ";";
 string codeLine;
 int lineNum = 0;
@@ -244,13 +247,29 @@ void Assembler::displayMachineCode(){
 		}
 		cout << endl;
 	}
+
+
+
+}
+
+void Assembler::printTofile(string fileName){
+
+	ofstream output_file(fileName);
+	for(vector<bool> vt: machineCode) {
+	     std::copy(vt.cbegin(), vt.cend(),
+	           std::ostream_iterator<bool>(output_file, ""));
+	     output_file << '\n';
+	}
+}
+Assembler::Assembler(){
+	this->init();
 }
 
 
 int main(){
   Assembler ass;
 	ass.init();
-  ass.readSource();
+  ass.readSource("BabyTest1-Assembler.txt");
 	ass.createMachineCode();
 	ass.displayMachineCode();
   return 0;
