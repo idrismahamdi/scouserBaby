@@ -1,268 +1,304 @@
 #include "baby.h"
-#include "opcodes.h"
-#include<string>
-#include<iostream>
-#include<fstream>
-#include <array>
-#include <vector>
-using namespace std;
+//The store of memory for the program
 
-//holds the line adress in the store of where the next line will be fetched
-int control[32]={0};
-//holds the instructions opcode
-int present[32]={0};
-//accumulator
-int accumulator[32]={0};
+store memory (32, line(32,0));
+// stores the current/next address to be processed
+line controlInstruction(32, 0);
+//holds the opcode of the current instruction
+line present(32, 0);
+//holds results of instructions
+line accumulator(32, 0);
 
-int operand[5]={0};
+//Holds the current operand bewteen fetch and decode
+line tempOperand(5, 0);
 
-int decimalOperand = 1;
+// //holds the operand of the current line being processed -- this is the address of the number in the store
+// //To be accessed and used in the instructions.
+int currentOperand; 
+//Holds the decimal opcode from the present
+int decimalPresent;
 
-int decimalOpcode = 0;
 
-int opcode[3]={0};
+/*
+Shows if the result in the accumulator is negative or positive -- false means positive.
+We are going to use the last bit in the accumulator to represent this
+-- eg if accumulator[31] == 1 then it is negative
+*/
+bool testFlop = false;
 
-int memory[32][32];
-
+//used to break the loop of the program
 bool Exit = false;
 
-bool testFlop = false;
-/*
-void Baby::initOpcodes(){
-
-	//swap round code values
-	opcode[0].input = {0,0,0};
-	opcode[1].input = {0,0,1};
-	opcode[2].input = {0,1,0};
-	opcode[3].input = {0,1,1};
-	opcode[4].input = {1,0,0};
-	opcode[5].input = {1,0,1};
-	opcode[6].input = {1,1,0};
-	opcode[7].input = {1,1,1};
-}
-*/
-
-
-
-void Baby::setPresent()
+//Function to convert an array of binary into a decimal number, passes in a line and returns a number.
+//Tested and working
+int Baby::binaryToDecimal(line vec)
 {
-	for(int i = 0; i < 32; i++)
-	{
-		present[i] = control[i];
-	}
-}
-void Baby::increment_CI()
-{
-  int temp = getOperand(control);
+	
+	int size = vec.size();
 
-  if(testFlop == true)
-  {
-    temp += 2;
-  }
-  else
-  {
-    temp++;
-  }
-  decimalToBinary(temp, 5, control);
-}
+	int j =0;
 
-
-void Baby::fetch(){
-
-	for(int i = 0; i < 5 ; i++){
-		operand[i] = present[4 - i];
-	}
-	for(int j = 0; j < 3; j++){
-		opcode[j]=present[15-j];
-	}
-}
-
-void Baby::initMemory(){
-	for(int i = 0; i<32; i++)
-	{
-		for(int j = 0; j<32; j++)
-		{
-			memory[i][j] = 0;
-		}
-	}
-}
-
-void Baby::decode()
-{
-	decimalOperand = binaryToDecimal(operand, 5);
-	decimalOpcode = binaryToDecimal(opcode, 3);
-}
-
-void Baby::decimalToBinary(int numberToConvert, int size, int arr[])
-{
-
-    int binaryNum[1000];
-    int i = 0;
-    while (numberToConvert > 0) {
-
-        binaryNum[i] = numberToConvert % 2;
-        numberToConvert = numberToConvert / 2;
-        i++;
+	for (int i = 0; i < (size / 2); i++) {
+        float temporary = vec[i];             
+        vec[i] = vec[(size - 1) - i];
+        vec[(size - 1) - i] = temporary;
     }
 
-  for(int i = 0; i < size; i++)
-  {
-  	arr[i]= binaryNum[i];
-  }
-}
-
-int Baby::binaryToDecimal(int arr[], int size)
-{
 	int out = 0;
 	int power = 1;
 	for(int i=0; i<size; i++)
 	{
-		out += arr[(size-1)-i]*power;
+		out += vec[(size - 1) - i]*power;
 		power *= 2;
 	}
+
+	
 	return out;
 }
 
-int Baby::getOperand(int arr[])
+/*
+This is a --working-- decimal to binary coverter. It takes the number you want to convert, 
+and returns a vector of the binary number you are trying to find.
+*/
+line Baby::decimalToBinary(int numberToConvert)
 {
-	int tempOperand[5];
+    line binaryNum(100, 0);
+    line result(32, 0);
+    int i=0,r;
 
-	for(int i = 0; i < 5 ; i++){
-		tempOperand[i] = present[4 - i];
+   
+	 
+	 while(numberToConvert!=0)
+	{
+	  r = numberToConvert%2;
+	  binaryNum[i++] = r;
+	  numberToConvert /= 2;
 	}
 
-	int result = binaryToDecimal(tempOperand, 5);
+  for(int i = 0; i < 32; i++)
+  {
+  	if(binaryNum[i] != 1)
+  	{
+  		binaryNum[i] = 0;
+  	}
 
-	if(accumulator[31] == 1)
+  	result[i]= binaryNum[i];
+  }
+
+  return result;
+}
+
+
+//Increments the control instruction by 1 
+// Tested and working for vectors
+void Baby::incrementCI()
+{
+	int controlDecimal = binaryToDecimal(controlInstruction);
+
+	if(testFlop == true)
+	{
+		controlDecimal = controlDecimal + 2;
+	}
+
+	else
+	{
+		controlDecimal = controlDecimal + 1;
+	}
+
+	controlInstruction = decimalToBinary(controlDecimal);
+}
+
+//Gets the memory address of the line to be accessed in the instructions, as well as the present opcode
+//and sets them to their global variables to be used later on in the program.
+//Tested and working with vectors
+void Baby::fetch()
+{
+	int controlDecimal = binaryToDecimal(controlInstruction);
+
+	for(int i = 0; i < 5 ; i++){
+		tempOperand[i] = memory[controlDecimal][i];
+	}
+	
+	for(int j = 13; j < 16; j++){
+		present[j - 13] = memory[controlDecimal][j];
+	}
+}
+
+void Baby::execute()
+{
+	switch(decimalPresent) {
+    case 0 : Baby::JMP();
+        cout << "JMP" << endl;
+    		break;
+    case 1 : Baby::JRP();
+        cout << "JRP" << endl;
+    		break;
+    case 2 : Baby::LDN();
+        cout << "LDN" << endl;
+    		break;
+    case 3 : Baby::STO();
+        cout << "STO" << endl;
+    		break;
+    case 4 : Baby::SUB();
+        cout << "SUB" << endl;
+    		break;
+    case 5 : Baby::SUB();
+        cout << "SUB" << endl;
+    		break;
+    case 6 : Baby::CMP();
+        cout << "CMP" << endl;
+    		break;
+    case 7 : Baby::STP();
+    	cout << "STP" << endl;
+    		break;
+    default: cout << "no opcode found" << endl;
+    		break;
+}
+}
+
+//Set the control instruction to the contents at the location of the store 
+void Baby::JMP()
+{
+	line tempLine = getCurrentMemoryLine();
+	int decimalStore = getLineDecimal(tempLine);
+
+	if(decimalStore < 0)
+		decimalStore = -decimalStore;
+
+	controlInstruction = decimalToBinary(decimalStore);
+}
+
+//Adds the content of the store to the control instruction
+void Baby::JRP()
+{
+	line tempLine = getCurrentMemoryLine();
+	int decimalStore = getLineDecimal(tempLine);
+	int decimalControl = getLineDecimal(controlInstruction);
+
+	int result = decimalControl + decimalStore;
+
+	if(result< 0)
 	{
 		result = -result;
 	}
 
-	return result;
+	controlInstruction = decimalToBinary(result);
 }
 
-void Baby::jmp(){
+//copies the accumulator to the store location
+void Baby::STO()
+{
+	int decimalAccumulator = getLineDecimal(accumulator);
+	bool negative = false;
+
+	if(decimalAccumulator < 0)
+	{
+		decimalAccumulator = -decimalAccumulator;
+		negative = true;
+	}
+
+	line tempLine = decimalToBinary(decimalAccumulator);
+
+	if(negative == true)
+	{
+		tempLine[31] = 1;
+	}
 
 	for(int i = 0; i < 32; i++)
 	{
-		control[i] = (memory[decimalOperand][i]);
+		memory[currentOperand][i] = tempLine[i];
+	}
+}
+
+//Sets the accumulator to the negative of the contents of the store.
+void Baby::LDN()
+{
+	line tempLine = getCurrentMemoryLine();
+
+	int decimalStore = getLineDecimal(tempLine);
+
+	accumulator = decimalToBinary(decimalStore);
+	accumulator[31] = 1;
+}
+
+//sets the accumulator to the contents of the accumulator minus the contents of the store.
+void Baby::SUB()
+{
+	int decimalAccumulator = getLineDecimal(accumulator);
+
+	line tempLine = getCurrentMemoryLine();
+
+	int decimalStore = getLineDecimal(tempLine);
+
+	int result = decimalAccumulator - decimalStore;
+	if(result < 0)
+	{
+		result = -result;
+		accumulator = decimalToBinary(result);
+		accumulator[31] = 1;
 	}
 
- }
+	else
+	{
+		accumulator = decimalToBinary(result);
+	}
+}
 
- void Baby::jrp(){
- 	int tempControl = getOperand(control);
-
- 	int tempStore[32];
-
- 	for(int i = 0; i < 32; i++)
- 	{
- 		tempStore[i] = memory[decimalOperand][i];
- 	}
-
- 	int storeOperand = getOperand(tempStore);
-
- 	tempControl = tempControl + storeOperand;
-
- 	decimalToBinary(tempControl, 32, control);
-
- }
-
- void Baby::ldn(){
-
-  	int tempStore[32];
-
- 	for(int i = 0; i < 32; i++)
- 	{
- 		tempStore[i] = memory[decimalOperand][i];
- 	}
-
- 	int storeOperand = getOperand(tempStore);
-
- 	int acc = storeOperand;
- 	decimalToBinary(acc, 32, accumulator);
- 	accumulator[31] = 1;
-
- }
-
- void Baby::sto(){
- 	for(int i = 0; i < 32; i++)
- 	{
- 		memory[decimalOperand][i] = accumulator[i];
- 	}
-
- }
-
- void Baby::sub(){
- 	int tempStore[32];
-
- 	for(int i = 0; i < 32; i++)
- 	{
- 		tempStore[i] = memory[decimalOperand][i];
- 	}
-
- 	int acc = getOperand(accumulator);
- 	int store = getOperand(tempStore);
-
- 	int newAcc = acc - store;
-
- 	decimalToBinary(newAcc, 32, accumulator);
-
- }
-
- void Baby::cmp(){
-   if(accumulator[31] == 1)
-   {
-     testFlop = true;
-   }
- }
-
- void Baby::stp(){
- 	Exit = true;
- }
-
-void Baby::execute()
+//increments the control instruction by 2 if the number in the accumulator is negative.
+void Baby::CMP()
 {
-	switch(decimalOpcode) {
-    case 0 : Baby::jmp();
-        cout << "jmp" << endl;
-    		break;
-    case 1 : Baby::jrp();
-        cout << "jrp" << endl;
-    		break;
-    case 2 : Baby::ldn();
-        cout << "ldn" << endl;
-    		break;
-    case 3 : Baby::sto();
-        cout << "sto" << endl;
-    		break;
-    case 4 : Baby::sub();
-        cout << "sub" << endl;
-    		break;
-    case 5 : Baby::sub();
-        cout << "sub" << endl;
-    		break;
-    case 6 : Baby::cmp();
-        cout << "cmp" << endl;
-    		break;
-    case 7 : Baby::stp();
-    		break;
-    default: cout << "no opcode found" << endl;
-    		break;
-
-     // We need to remember in the execute function to set the control
-     // instruction array to the memory array at the position of the operand
-
-      for(int i = 0; i < 5; i++ )
-    {
-    	control[i] = memory[decimalOperand][i];
-    }
-}
+	int decimalAccumulator = getLineDecimal(accumulator);
+	if(decimalAccumulator < 0)
+	{
+		testFlop = true;
+	}
 }
 
+//Used to break the loop
+void Baby::STP()
+{
+	Exit = true;
+}
+
+//Returns the line from the current address in memory.
+line Baby::getCurrentMemoryLine()
+{
+	line tempLine(32, 0);
+
+	for(int i = 0; i < 32; i++)
+	{
+		tempLine[i] = memory[currentOperand-1][i];
+	}
+
+	return tempLine;
+}
+
+//Returns the decimal of the line vector that is passed into them.
+int Baby::getLineDecimal(line vec)
+{
+	int decimalVec;
+
+	if(vec[31] == 1)
+	{
+		vec[31] = 0;
+		decimalVec = binaryToDecimal(vec);
+		decimalVec = -decimalVec;
+		vec[31] = 1;
+	}
+
+	else
+	{
+		decimalVec = binaryToDecimal(vec);
+	}
+
+	return decimalVec;
+	
+	}
+
+
+//Reads the file in initialise each vector line.
+//working with vectors
 void Baby::readFile(){
-
-
 	char letter;
 	string line;
 	ifstream out("BabyTest1-MC.txt");
@@ -281,70 +317,53 @@ void Baby::readFile(){
 
 	for(int i=0; i<32; i++)
 	{
-		control[i]=memory[1][i];
+		controlInstruction[i]=memory[0][i];
 	}
 
 	out.close();
 }
 
+//sets the present and operand to the correct number.
+void Baby::decode()
+{
+	decimalPresent = binaryToDecimal(present);
+	currentOperand = binaryToDecimal(tempOperand);
+}
 
-void Baby::printMemory(){
-	for(int i = 0; i<32; i++)
+//Displays the state of the memory at the end of each loop
+void Baby::displayEverything()
+{
+	int controlDecimal = getLineDecimal(controlInstruction);
+
+	cout << "This was the memory state when the control instruction was " << controlDecimal << endl;
+	for (int i =0; i < 32; i++)
 	{
-		for(int j = 0; j<32; j++)
+		for(int j = 0; j < 32; j++)
 		{
 			cout << memory[i][j];
 		}
-		cout << "" << endl;
+		cout << endl;
 	}
+
+	
 }
 
-void Baby::display()
+int main()
 {
-  cout << "Control instruction: ";
-  for(int i = 0; i < 32; i++)
-  {
-    cout << control[i];
-  }
-
-  cout << " present: ";
-  for(int i = 0; i < 32; i++)
-  {
-    cout << present[i];
-  }
-
-  cout << " operand: ";
-  for(int i = 0; i < 5; i++) 
-  {
-    cout << operand[i];
-  }
-
-  cout << " opcode: ";
-  for(int i = 0; i < 3; i++)
-	{
-		cout << opcode[i];
-	}
-  cout << ""<< endl;
-
-  cout << "decimalOperand: "<< decimalOperand << endl;
-  cout << "decimalOpcode: "<< decimalOpcode << endl;
-}
-
-int main(){
 	Baby baby;
-	 baby.initMemory();
-	 baby.readFile();
-	// baby.printMemory();
 
-	// while (Exit == false){
+	baby.readFile();
 
-  for(int i = 0; i < 4; i++)
-  {
-	   baby.setPresent();
-     baby.increment_CI();
-	   baby.fetch();
-	   baby.decode();
-	   baby.execute();
-     baby.display();
+	while(Exit == false)
+	{
+		baby.incrementCI();
+		baby.fetch();
+		baby.decode();
+		baby.execute();
+		baby.displayEverything();
 	}
+
+	return 0;
 }
+
+
