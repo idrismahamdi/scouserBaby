@@ -298,7 +298,7 @@ line Baby::getCurrentMemoryLine()
 	//sets the tempLine vector to be the same as the vector of the current address in memory. 
 	for(int i = 0; i < 32; i++)
 	{
-		tempLine[i] = memory[currentOperand-1][i];
+		tempLine[i] = memory[currentOperand][i];
 	}
 
 	return tempLine;
@@ -370,8 +370,8 @@ void Baby::decode()
 
 //Displays the state of the memory at the end of each loop
 void Baby::displayEverything()
-{
-	int controlDecimal = getLineDecimal(controlInstruction);
+{ 
+    	int controlDecimal = getLineDecimal(controlInstruction);
 	int decimalAccumulator = getLineDecimal(accumulator);
 	int decimalPresent = getLineDecimal(present);
 
